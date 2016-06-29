@@ -2,7 +2,7 @@ QT += gui core
 
 CONFIG += c++11
 
-TARGET = Spotlight
+TARGET = EdgeDetection
 CONFIG += console
 CONFIG -= app_bundle
 

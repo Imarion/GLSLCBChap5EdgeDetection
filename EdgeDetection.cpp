@@ -79,7 +79,7 @@ void MyWindow::initialize()
     pass2Index = mFuncs->glGetSubroutineIndex( mProgram->programId(), GL_FRAGMENT_SHADER, "pass2");
 
     initMatrices();
-    //setupFBO();
+    setupFBO();
 
     glFrontFace(GL_CCW);
     glEnable(GL_DEPTH_TEST);
@@ -282,18 +282,18 @@ void MyWindow::render()
     static float EvolvingVal = 0;
     EvolvingVal += 0.1f;
 
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, mFBOHandle);
     pass1();
-    //pass2();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    pass2();
 }
 
 void MyWindow::pass1()
-{
-
-    glBindFramebuffer(GL_FRAMEBUFFER, mFBOHandle);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+{   
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // *** Draw teapot
@@ -395,13 +395,10 @@ void MyWindow::pass1()
         glDisableVertexAttribArray(1);
     }
     mProgram->release();
-
-    mContext->swapBuffers(this);
 }
 
 void MyWindow::pass2()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mFuncs->glBindVertexArray(mVAOFSQuad);
@@ -412,7 +409,10 @@ void MyWindow::pass2()
 
     mProgram->bind();
     {
+        mProgram->setUniformValue("EdgeThreshold", 0.1f);
+
         mFuncs->glUniformSubroutinesuiv( GL_FRAGMENT_SHADER, 1, &pass2Index);
+
         QMatrix4x4 mv1 ,proj;
 
         mProgram->setUniformValue("ModelViewMatrix", mv1);
@@ -552,3 +552,4 @@ void MyWindow::setupFBO() {
     // Unbind the framebuffer, and revert to default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
